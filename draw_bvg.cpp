@@ -26,15 +26,11 @@ public:
 				canvas[x][y] = background_colour;
 	}
 	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
-    for (int i = 0; i < width; i++) {
-      canvas[i][50] = colour;
-      canvas[i][51] = colour;
-      canvas[i][52] = colour;
-      canvas[i][53] = colour;
-      canvas[i][54] = colour;
-      canvas[i][55] = colour;
-      canvas[i][56] = colour;
-      canvas[i][57] = colour;
+    float slope = (float)(endpoint2.y - endpoint1.y) / (endpoint2.x - endpoint1.x);
+
+    for (int i = endpoint1.x; i < endpoint2.x; i++) {
+      float y = slope * i;    
+      canvas[i][y] = colour;
     }
 	}
 	virtual void render_circle(Vector2d center, int radius, ColourRGB line_colour, int line_thickness){
