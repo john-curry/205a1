@@ -6,6 +6,7 @@
 
 #include <string>
 #include <iostream>
+#include <cstdlib>
 #include "vector2d.h"
 #include "colourRGB.h"
 #include "bvg.h"
@@ -26,11 +27,29 @@ public:
 				canvas[x][y] = background_colour;
 	}
 	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
-    float slope = (float)(endpoint2.y - endpoint1.y) / (endpoint2.x - endpoint1.x);
+    // check which quadrent we are drawing in and what the slope is
+    // if slope is too high flip x and y
+    // reconfigure endpoints to be in top right quad
+    // do algorithm
+    // convert all points back to their respective quad
+    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
 
-    for (int i = endpoint1.x; i < endpoint2.x; i++) {
-      float y = slope * i;    
-      canvas[i][y] = colour;
+    int x = endpoint1.x;
+    int y = endpoint1.y;
+    
+    int F = 0;
+
+    while (x <= endpoint2.x) {
+      canvas[x][y] = colour;
+      
+      if (abs(F + L.y) < abs(F + (L.y - L.x))) {
+        x++;
+        F += L.y;
+      } else {
+        x++;
+        y++;
+        F += L.y - L.x;
+      }
     }
 	}
 	virtual void render_circle(Vector2d center, int radius, ColourRGB line_colour, int line_thickness){

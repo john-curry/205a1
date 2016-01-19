@@ -1,3 +1,5 @@
 *.png
 *.o
 tags
+draw_bvg
+bvg_draw
