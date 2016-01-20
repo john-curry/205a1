@@ -2,10 +2,10 @@
    B. Bird - 01/02/2016
 */
 
-
 #include <string>
 #include <iostream>
 #include <cstdlib>
+#include <algorithm>
 #include "vector2d.h"
 #include "colourRGB.h"
 #include "bvg.h"
@@ -26,27 +26,43 @@ public:
       }
     }
 	}
-	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
-    // check which quadrent we are drawing in and what the slope is
-    // if slope is too high flip x and y
-    // reconfigure endpoints to be in top right quad
-    // do algorithm
-    // convert all points back to their respective quad
-
-    // if the slope is to large switch x and y
-    //  int delta_x = endpoint2.x - endpoint1.x;
-    //  int delta_y = endpoint2.y - endpoint1.y;
-
-    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
-    int x, y, end;
-    x = endpoint1.y;
-    y = endpoint1.x;
-    end = endpoint2.y;
-
+  void render_steep_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    cout << "RENDERING STEEPLINE" << endl;
     int F = 0;
-    cout << "Starting x: " << x << " and starting y: "<< y << endl;
+    int x = endpoint1.x;
+    int y = endpoint1.y;
+    int end = endpoint2.y;
+    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
 
-    while (x <= end) {
+    cout << "Starting x: " << x << " and starting y: "<< y << endl;
+    cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
+
+    while (y < end) {
+      canvas[x][y] = colour;
+
+      if (abs(F + L.y) < abs(F + (L.y - L.x))) {
+        y++;
+        F += L.y;
+      } else {
+        x++;
+        y++;
+        F += L.y - L.x;
+      }
+    }
+    cout << "Ending up at x: " << x << " and y: " << y << endl;
+  }
+
+  void render_positive_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    int F = 0;
+    int x = endpoint1.x;
+    int y = endpoint1.y;
+    int end = endpoint2.x;
+    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
+
+    cout << "Starting x: " << x << " and starting y: "<< y << endl;
+    cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
+
+    while (x < end) {
       canvas[x][y] = colour;
       
       if (abs(F + L.y) < abs(F + (L.y - L.x))) {
@@ -57,6 +73,31 @@ public:
         y++;
         F += L.y - L.x;
       }
+    }
+    cout << "Ending up at x: " << x << " and y: " << y << endl;
+
+  }
+    
+	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    // check which quadrent we are drawing in and what the slope is
+    // if slope is too high flip x and y
+    // reconfigure endpoints to be in top right quad
+    // do algorithm
+    // convert all points back to their respective quad
+
+    // if the slope is to large switch x and y
+    int delta_x = endpoint2.x - endpoint1.x;
+    int delta_y = endpoint2.y - endpoint1.y;
+
+
+    if (delta_x < 0 && delta_y < 0) {
+      render_positive_line(endpoint2, endpoint1, colour, thickness);
+    } else {
+      render_positive_line(endpoint1, endpoint2, colour, thickness);
+    }
+
+    if (abs(delta_x) < abs(delta_y)) {
+      render_steep_line(endpoint1, endpoint2, colour, thickness);
     }
 	}
 
