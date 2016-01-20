@@ -1,8 +1,7 @@
 /* draw_bvg.cpp
-   
-   
    B. Bird - 01/02/2016
 */
+
 
 #include <string>
 #include <iostream>
@@ -14,7 +13,6 @@
 
 using namespace std;
 
-
 class BVGRenderer: public BVGRendererBase{
 public:
 	virtual void create_canvas(Vector2d dimensions, ColourRGB background_colour, int scale_factor){
@@ -23,7 +21,6 @@ public:
 		height = dimensions[1];
 		canvas.initialize_canvas(dimensions[0],dimensions[1]);
 		for (int y = 0; y < height; y++) {
-      background_colour.r += 1;
 			for (int x = 0; x < width; x++) {
 				canvas[x][y] = background_colour;
       }
@@ -35,14 +32,21 @@ public:
     // reconfigure endpoints to be in top right quad
     // do algorithm
     // convert all points back to their respective quad
-    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
 
-    int x = endpoint1.x;
-    int y = endpoint1.y;
-        
+    // if the slope is to large switch x and y
+    //  int delta_x = endpoint2.x - endpoint1.x;
+    //  int delta_y = endpoint2.y - endpoint1.y;
+
+    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
+    int x, y, end;
+    x = endpoint1.y;
+    y = endpoint1.x;
+    end = endpoint2.y;
+
     int F = 0;
     cout << "Starting x: " << x << " and starting y: "<< y << endl;
-    while (x <= endpoint2.x) {
+
+    while (x <= end) {
       canvas[x][y] = colour;
       
       if (abs(F + L.y) < abs(F + (L.y - L.x))) {
@@ -55,6 +59,7 @@ public:
       }
     }
 	}
+
 	virtual void render_circle(Vector2d center, int radius, ColourRGB line_colour, int line_thickness){
 		cout << "Circle " << center << radius << line_colour << line_thickness << endl;
 	}
