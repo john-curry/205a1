@@ -10,6 +10,7 @@
 #include "colourRGB.h"
 #include "bvg.h"
 #include "png_canvas.h"
+#include "debug.h"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ public:
     }
 	}
   void render_steep_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
-    cout << "RENDERING STEEPLINE" << endl;
+    cout << "START RENDERING STEEPLINE" << endl;
     int F = 0;
     int x = endpoint1.x;
     int y = endpoint1.y;
@@ -50,6 +51,7 @@ public:
       }
     }
     cout << "Ending up at x: " << x << " and y: " << y << endl;
+    cout << "DONE RENDERING STEEP LINE"<< endl;
   }
 
   void render_positive_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
@@ -77,7 +79,35 @@ public:
     cout << "Ending up at x: " << x << " and y: " << y << endl;
 
   }
-    
+
+  
+	void render_negative_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    cout << "START RENDERING NEGATIVE LINE" << endl;
+    int F = 0;
+    int x = endpoint1.x;
+    int y = endpoint1.y;
+    int end = endpoint2.x;
+    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
+
+    cout << "Starting x: " << x << " and starting y: "<< y << endl;
+    cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
+
+    while (x < end) {
+      canvas[x][y] = colour;
+      // TODO: figure out why switching the signs fixed y not being decremented 
+      if (abs(F - L.y) < abs(F - (L.y - L.x))) {
+        x++;
+        F += L.y;
+      } else {
+        x++;
+        y--;
+        F += L.y - L.x;
+      }
+    }
+    cout << "Ending up at x: " << x << " and y: " << y << endl;
+    cout << "DONE RENDERING NEGATIVE LINE" << endl;
+
+  } 
 	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
     // check which quadrent we are drawing in and what the slope is
     // if slope is too high flip x and y
@@ -88,16 +118,35 @@ public:
     // if the slope is to large switch x and y
     int delta_x = endpoint2.x - endpoint1.x;
     int delta_y = endpoint2.y - endpoint1.y;
-
-
-    if (delta_x < 0 && delta_y < 0) {
-      render_positive_line(endpoint2, endpoint1, colour, thickness);
-    } else {
-      render_positive_line(endpoint1, endpoint2, colour, thickness);
+    
+    if ((delta_x < 0) ^ (delta_y < 0)) { 
+      render_negative_line(endpoint1, endpoint2, colour, thickness);
+      //if (abs(delta_x) < abs(delta_y)) {
+      //  if (delta_x < 0 && delta_y < 0) {
+      //    render_steep_line(endpoint2, endpoint1, colour, thickness);
+      //  } else {
+      //    render_steep_line(endpoint1, endpoint2, colour, thickness);
+      //  }
+      //} else {
+      //  if (delta_x < 0 && delta_y < 0) {
+      //    render_negative_line(endpoint2, endpoint1, colour, thickness);
+      //  } else {
+      //    render_negative_line(endpoint1, endpoint2, colour, thickness);
+      //  }
+      //}
     }
-
     if (abs(delta_x) < abs(delta_y)) {
-      render_steep_line(endpoint1, endpoint2, colour, thickness);
+      if (delta_x < 0 && delta_y < 0) {
+        render_steep_line(endpoint2, endpoint1, colour, thickness);
+      } else {
+        render_steep_line(endpoint1, endpoint2, colour, thickness);
+      }
+    } else {
+      if (delta_x < 0 && delta_y < 0) {
+        render_positive_line(endpoint2, endpoint1, colour, thickness);
+      } else {
+        render_positive_line(endpoint1, endpoint2, colour, thickness);
+      }
     }
 	}
 
