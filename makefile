@@ -1,9 +1,17 @@
 CC=clang++ 
+FLAGS=-std=c++11 -Wall -pedantic -g
+OUT=bvg_draw
+SRC=$(wildcard *.cpp)
+OBJ=$(SRC:.cpp=.o)
 
-all: 
-	clang++ -std=c++11 -Wall -pedantic -o bvg_draw *.cpp
+$(OUT): $(OBJ)
+	$(CC) $(FLAGS) -o $@ $? && ctags *.cpp
 
-test: bvg_draw
-	./bvg_draw test2.txt out.png && xdg-open out.png
+$(OBJ): $(SRC)
+	$(CC) $(FLAGS) -c $?
 
+test: $(OUT)
+	./$(OUT) test2.txt out.png && xdg-open out.png
 
+clean: 
+	rm $(OUT) $(OBJ)

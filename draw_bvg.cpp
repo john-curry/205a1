@@ -22,9 +22,12 @@ public:
 		width = dimensions[0];
 		height = dimensions[1];
 		canvas.initialize_canvas(dimensions[0],dimensions[1]);
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++)
+		for (int y = 0; y < height; y++) {
+      background_colour.r += 1;
+			for (int x = 0; x < width; x++) {
 				canvas[x][y] = background_colour;
+      }
+    }
 	}
 	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
     // check which quadrent we are drawing in and what the slope is
@@ -36,9 +39,9 @@ public:
 
     int x = endpoint1.x;
     int y = endpoint1.y;
-    
+        
     int F = 0;
-
+    cout << "Starting x: " << x << " and starting y: "<< y << endl;
     while (x <= endpoint2.x) {
       canvas[x][y] = colour;
       
