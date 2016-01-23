@@ -108,6 +108,18 @@ public:
     cout << "DONE RENDERING NEGATIVE LINE" << endl;
 
   } 
+  void render_vertical_line(int x, int start_y, int end_y, ColourRGB colour, int thickness) {
+    if (start_y < end_y) {
+      for (int i = start_y; i < end_y; ++i) {
+        canvas[x][i] = colour;
+      }
+    } else {
+      for (int i = end_y; i < start_y; ++i) {
+        canvas[x][i] = colour;
+      }
+    }
+  }
+   
 	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
     // check which quadrent we are drawing in and what the slope is
     // if slope is too high flip x and y
@@ -118,7 +130,17 @@ public:
     // if the slope is to large switch x and y
     int delta_x = endpoint2.x - endpoint1.x;
     int delta_y = endpoint2.y - endpoint1.y;
-    
+
+    if (delta_y == 0 && delta_x == 0) {
+      canvas[endpoint1.x][endpoint1.y] = colour;
+      return;
+    }
+
+    if (delta_x == 0) {
+      render_vertical_line(endpoint1.x, endpoint1.y, endpoint2.y, colour, thickness);   
+      return;
+    }
+
     if ((delta_x < 0) ^ (delta_y < 0)) { 
       render_negative_line(endpoint1, endpoint2, colour, thickness);
       //if (abs(delta_x) < abs(delta_y)) {
@@ -151,10 +173,66 @@ public:
 	}
 
 	virtual void render_circle(Vector2d center, int radius, ColourRGB line_colour, int line_thickness){
-		cout << "Circle " << center << radius << line_colour << line_thickness << endl;
+    cout << "RENDERING CIRCLE" << endl;
+    int F = 0;
+    int x = 0;
+    int y = radius;
+    cout << "start x: " << x << " start y: " << y << endl;
+    while (x <= y) {
+      canvas[ x + center.x][ y + center.y] = line_colour;
+      canvas[-x + center.x][ y + center.y] = line_colour;
+      canvas[ x + center.x][-y + center.y] = line_colour;
+      canvas[-x + center.x][-y + center.y] = line_colour;
+      canvas[ y + center.y][ x + center.x] = line_colour;
+      canvas[-y + center.y][ x + center.x] = line_colour;
+      canvas[ y + center.y][-x + center.x] = line_colour;
+      canvas[-y + center.y][-x + center.x] = line_colour;
+      if (abs(F + (2 * x) + 1) < abs(F + (2 * x) - (2 * y) + 2)) {
+        x++;
+        F = F + 2 * x;
+      } else {
+        x++;
+        y--;
+        F = F + 2 * x - 2 * y + 2;
+      }
+    }
+    cout << "end x: " << x << " end y: " << y << endl;
+    cout << "DONE RENDERING CIRCLE" << endl;
 	}
 	virtual void render_filledcircle(Vector2d center, int radius, ColourRGB line_colour, int line_thickness, ColourRGB fill_colour){
-		cout << "Filled Circle " << center << radius << line_colour << line_thickness << fill_colour << endl;
+    cout << "RENDERING FILLED CIRCLE" << endl;
+    int F = 0;
+    int x = 0;
+    int y = radius;
+    cout << "start x: " << x << " start y: " << y << endl;
+    while (x <= y) {
+      canvas[ x + center.x][ y + center.y] = fill_colour;
+      canvas[-x + center.x][ y + center.y] = fill_colour;
+      canvas[ x + center.x][-y + center.y] = fill_colour;
+      canvas[-x + center.x][-y + center.y] = fill_colour;
+      canvas[ y + center.y][ x + center.x] = fill_colour;
+      canvas[-y + center.y][ x + center.x] = fill_colour;
+      canvas[ y + center.y][-x + center.x] = fill_colour;
+      canvas[-y + center.y][-x + center.x] = fill_colour;
+
+      render_line(Vector2d(-x + center.x,  y + center.y), Vector2d( x + center.x,  y + center.y), fill_colour, 1);
+      render_line(Vector2d(-y + center.y,  x + center.x), Vector2d( y + center.y,  x + center.x), fill_colour, 1);
+      render_line(Vector2d(-x + center.x, -y + center.y), Vector2d( x + center.x, - y + center.y), fill_colour, 1);
+      render_line(Vector2d(-y + center.y, -x + center.x), Vector2d( y + center.y, - x + center.x), fill_colour, 1);
+
+      if (abs(F + (2 * x) + 1) < abs(F + (2 * x) - (2 * y) + 2)) {
+        x++;
+        F = F + 2 * x;
+      } else {
+        x++;
+        y--;
+        F = F + 2 * x - 2 * y + 2;
+      }
+    }
+    cout << "end x: " << x << " end y: " << y << endl;
+    render_circle(center, radius, line_colour, line_thickness);
+    cout << "DONE RENDERING FILLED CIRCLE" << endl;
+
 	}
 	virtual void render_triangle(Vector2d point1, Vector2d point2, Vector2d point3, ColourRGB line_colour, int line_thickness, ColourRGB fill_colour){
 		cout << "Triangle " << point1 << point2 << point3 << line_colour << line_thickness << fill_colour << endl;
