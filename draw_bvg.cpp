@@ -92,9 +92,10 @@ public:
     cout << "Starting x: " << x << " and starting y: "<< y << endl;
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
-    while (x < end) {
+    while (x < end && y >= 0) {
       canvas[x][y] = colour;
       // TODO: figure out why switching the signs fixed y not being decremented 
+      // TODO: why does y get negative
       if (abs(F - L.y) < abs(F - (L.y - L.x))) {
         x++;
         F += L.y;
@@ -235,8 +236,19 @@ public:
 
 	}
 	virtual void render_triangle(Vector2d point1, Vector2d point2, Vector2d point3, ColourRGB line_colour, int line_thickness, ColourRGB fill_colour){
-		cout << "Triangle " << point1 << point2 << point3 << line_colour << line_thickness << fill_colour << endl;
+    cout << "RENDERING TRIANGLE" << endl;
+
+    vector<Vector2d> vertices = { point1, point2, point3 }; 
+
+    sort(vertices.begin(), vertices.end(), [] (Vector2d a, Vector2d b) { return a.x < b.x; });
+
+	  render_line(vertices[0], vertices[1], line_colour, line_thickness);
+	  render_line(vertices[0], vertices[3], line_colour, line_thickness);
+	  render_line(vertices[2], vertices[3], line_colour, line_thickness);
+    
+    cout << "DONE RENDERING TRIANGLE" << endl;
 	}
+
 	virtual void render_gradient_triangle(Vector2d point1, Vector2d point2, Vector2d point3, ColourRGB line_colour, int line_thickness, ColourRGB colour1, ColourRGB colour2, ColourRGB colour3){
 		cout << "Triangle " << point1 << point2 << point3 << line_colour << line_thickness << colour1 << colour2 << colour3 << endl;
 	}

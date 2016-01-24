@@ -487,7 +487,7 @@ void BVGReader::parse_internal(FILE* f){
 		while(len > 0  && isspace(line[len-1])){
 			line[--len] = '\0';
 		}
-		if( len == 0 )
+		if( len == 0 || line[0] == '#' )
 			continue;
 		string L(line);
 		string command = get_command_name(L);
