@@ -1,5 +1,5 @@
 CC=clang++ 
-FLAGS=-std=c++11 -Wall -pedantic -g
+FLAGS=-std=c++14 -Wall -pedantic -g
 OUT=bvg_draw
 SRC=bvg.cpp draw_bvg.cpp lodepng.cpp
 OBJ=bvg.o draw_bvg.o lodepng.o

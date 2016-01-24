@@ -30,7 +30,8 @@ public:
       }
     }
 	}
-  void render_steep_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+  vector<Vector2d> render_steep_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    vector<Vector2d> ret;
     cout << "START RENDERING STEEPLINE" << endl;
     int F = 0;
     int x = endpoint1.x;
@@ -42,11 +43,12 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (y < end) {
+      ret.push_back(Vector2d(x, y));
       canvas[x][y] = colour;
 
-      if (abs(F + L.y) < abs(F + (L.y - L.x))) {
+      if (abs(F - L.x) < abs(F + (L.y - L.x))) {
         y++;
-        F += L.y;
+        F -= L.x;
       } else {
         x++;
         y++;
@@ -55,9 +57,11 @@ public:
     }
     cout << "Ending up at x: " << x << " and y: " << y << endl;
     cout << "DONE RENDERING STEEP LINE"<< endl;
+    return ret;
   }
 
-  void render_positive_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+ vector<Vector2d> render_positive_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    vector<Vector2d> ret;
     int F = 0;
     int x = endpoint1.x;
     int y = endpoint1.y;
@@ -68,6 +72,7 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (x < end) {
+      ret.push_back(Vector2d(x, y));
       canvas[x][y] = colour;
       
       if (abs(F + L.y) < abs(F + (L.y - L.x))) {
@@ -80,11 +85,12 @@ public:
       }
     }
     cout << "Ending up at x: " << x << " and y: " << y << endl;
-
+    return ret;
   }
 
   
-	void render_negative_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+	vector<Vector2d> render_negative_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    vector<Vector2d> ret;
     cout << "START RENDERING NEGATIVE LINE" << endl;
     int F = 0;
     int x = endpoint1.x;
@@ -96,35 +102,69 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (x < end && y >= 0) {
+      ret.push_back(Vector2d(x, y));
       canvas[x][y] = colour;
       // TODO: figure out why switching the signs fixed y not being decremented 
       // TODO: why does y get negative
-      if (abs(F - L.y) < abs(F - L.y - L.x)) {
+      if (abs(F + L.y) < abs(F + L.y + L.x)) {
         x++;
-        F -= L.y;
+        F += L.y;
       } else {
         x++;
         y--;
-        F = F - L.y - L.x;
+        F += L.y + L.x;
       }
     }
     cout << "Ending up at x: " << x << " and y: " << y << endl;
     cout << "DONE RENDERING NEGATIVE LINE" << endl;
-
+    return ret;
   } 
-  void render_vertical_line(int x, int start_y, int end_y, ColourRGB colour, int thickness) {
+	vector<Vector2d> render_negative_steep_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+  	vector<Vector2d> ret;
+    cout << "START RENDERING NEGATIVE STEEP LINE " << endl;
+    int F = 0;
+    int x = endpoint1.x;
+    int y = endpoint1.y;
+    int end = endpoint2.y;
+    auto L = Vector2d(endpoint2.x - endpoint1.x, endpoint2.y - endpoint1.y);
+
+    cout << "Starting x: " << x << " and starting y: "<< y << endl;
+    cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
+
+    while (y >= end) {
+      ret.push_back(Vector2d(x, y));
+      canvas[x][y] = colour;
+
+      if (abs(F - L.x) < abs(F - L.y - L.x)) {
+        y--;
+        F -= L.x;
+      } else {
+        y--;
+        x++;
+        F += -L.y - L.x;
+      }
+    }
+    cout << "Ending up at x: " << x << " and y: " << y << endl;
+    cout << "DONE RENDERING NEGATIVE STEEP LINE" << endl;
+    return ret;
+  } 
+ vector<Vector2d> render_vertical_line(int x, int start_y, int end_y, ColourRGB colour, int thickness) {
+  	vector<Vector2d> ret;
     if (start_y < end_y) {
       for (int i = start_y; i < end_y; ++i) {
         canvas[x][i] = colour;
+        ret.push_back(Vector2d(x, i));
       }
     } else {
       for (int i = end_y; i < start_y; ++i) {
         canvas[x][i] = colour;
+        ret.push_back(Vector2d(x, i));
       }
     }
+    return ret;
   }
-   
-	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+  vector<Vector2d> render_and_return_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    vector<Vector2d> ret;
     // check which quadrent we are drawing in and what the slope is
     // if slope is too high flip x and y
     // reconfigure endpoints to be in top right quad
@@ -137,44 +177,49 @@ public:
 
     if (delta_y == 0 && delta_x == 0) {
       canvas[endpoint1.x][endpoint1.y] = colour;
-      return;
+      ret = { endpoint1 };
+      return ret;
     }
 
     if (delta_x == 0) {
-      render_vertical_line(endpoint1.x, endpoint1.y, endpoint2.y, colour, thickness);   
-      return;
+      ret = render_vertical_line(endpoint1.x, endpoint1.y, endpoint2.y, colour, thickness);   
+      return ret;
     }
 
     if ((delta_x < 0) ^ (delta_y < 0)) { 
-      render_negative_line(endpoint1, endpoint2, colour, thickness);
-      return;
-      //if (abs(delta_x) < abs(delta_y)) {
-      //  if (delta_x < 0 && delta_y < 0) {
-      //    render_steep_line(endpoint2, endpoint1, colour, thickness);
-      //  } else {
-      //    render_steep_line(endpoint1, endpoint2, colour, thickness);
-      //  }
-      //} else {
-      //  if (delta_x < 0 && delta_y < 0) {
-      //    render_negative_line(endpoint2, endpoint1, colour, thickness);
-      //  } else {
-      //    render_negative_line(endpoint1, endpoint2, colour, thickness);
-      //  }
-      //}
+      if (abs(delta_x) < abs(delta_y)) {
+        if (delta_x < 0 && delta_y < 0) {
+          ret = render_negative_steep_line(endpoint2, endpoint1, colour, thickness);
+        } else {
+          ret = render_negative_steep_line(endpoint1, endpoint2, colour, thickness);
+        }
+      } else {
+        if (delta_x < 0 && delta_y < 0) {
+          ret = render_negative_line(endpoint2, endpoint1, colour, thickness);
+        } else {
+          ret = render_negative_line(endpoint1, endpoint2, colour, thickness);
+        }
+      }
+      return ret;
     }
     if (abs(delta_x) < abs(delta_y)) {
       if (delta_x < 0 && delta_y < 0) {
-        render_steep_line(endpoint2, endpoint1, colour, thickness);
+        ret = render_steep_line(endpoint2, endpoint1, colour, thickness);
       } else {
-        render_steep_line(endpoint1, endpoint2, colour, thickness);
+        ret = render_steep_line(endpoint1, endpoint2, colour, thickness);
       }
     } else {
       if (delta_x < 0 && delta_y < 0) {
-        render_positive_line(endpoint2, endpoint1, colour, thickness);
+        ret = render_positive_line(endpoint2, endpoint1, colour, thickness);
       } else {
-        render_positive_line(endpoint1, endpoint2, colour, thickness);
+        ret = render_positive_line(endpoint1, endpoint2, colour, thickness);
       }
     }
+    return ret;
+  }
+
+	virtual void render_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
+    render_and_return_line(endpoint1, endpoint2, colour, thickness);
 	}
 
 	virtual void render_circle(Vector2d center, int radius, ColourRGB line_colour, int line_thickness){
@@ -241,14 +286,18 @@ public:
 	}
 	virtual void render_triangle(Vector2d point1, Vector2d point2, Vector2d point3, ColourRGB line_colour, int line_thickness, ColourRGB fill_colour){
     cout << "RENDERING TRIANGLE" << endl;
-
+    cout << "Points are as follows " << point1 << point2 << point3 << endl;
     vector<Vector2d> vertices = { point1, point2, point3 }; 
 
-    sort(vertices.begin(), vertices.end(), [] (Vector2d a, Vector2d b) { return a.x < b.x; });
+    sort(vertices.begin(), vertices.end(), [] (auto a, auto b) { return a.x < b.x; });
 
-	  render_line(vertices[0], vertices[1], line_colour, line_thickness);
-	  render_line(vertices[0], vertices[3], line_colour, line_thickness);
-	  render_line(vertices[2], vertices[3], line_colour, line_thickness);
+    cout << "Points in order are as follows " << vertices[0] << vertices[1] << vertices[2] << endl;
+    // line from start to middle 
+	  auto line0 = render_and_return_line(vertices[0], vertices[1], line_colour, line_thickness);
+
+    // line from 
+	  auto line1 = render_and_return_line(vertices[0], vertices[2], line_colour, line_thickness);
+	  auto line2 = render_and_return_line(vertices[1], vertices[2], line_colour, line_thickness);
     
     cout << "DONE RENDERING TRIANGLE" << endl;
 	}
