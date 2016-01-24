@@ -24,6 +24,9 @@ public:
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				canvas[x][y] = background_colour;
+        if (x % 100 == 0 || y % 100 == 0) {
+          canvas[x][y] = ColourRGB(255, 255, 255);
+        }
       }
     }
 	}
@@ -96,13 +99,13 @@ public:
       canvas[x][y] = colour;
       // TODO: figure out why switching the signs fixed y not being decremented 
       // TODO: why does y get negative
-      if (abs(F - L.y) < abs(F - (L.y - L.x))) {
+      if (abs(F - L.y) < abs(F - L.y - L.x)) {
         x++;
-        F += L.y;
+        F -= L.y;
       } else {
         x++;
         y--;
-        F += L.y - L.x;
+        F = F - L.y - L.x;
       }
     }
     cout << "Ending up at x: " << x << " and y: " << y << endl;
@@ -144,6 +147,7 @@ public:
 
     if ((delta_x < 0) ^ (delta_y < 0)) { 
       render_negative_line(endpoint1, endpoint2, colour, thickness);
+      return;
       //if (abs(delta_x) < abs(delta_y)) {
       //  if (delta_x < 0 && delta_y < 0) {
       //    render_steep_line(endpoint2, endpoint1, colour, thickness);
