@@ -43,7 +43,6 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (y < end) {
-      ret.push_back(Vector2d(x, y));
       canvas[x][y] = colour;
 
       if (abs(F - L.x) < abs(F + (L.y - L.x))) {
@@ -52,6 +51,7 @@ public:
       } else {
         x++;
         y++;
+      ret.push_back(Vector2d(x, y));
         F += L.y - L.x;
       }
     }
@@ -102,8 +102,8 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (x < end && y >= 0) {
-      ret.push_back(Vector2d(x, y));
       canvas[x][y] = colour;
+      ret.push_back(Vector2d(x, y));
       // TODO: figure out why switching the signs fixed y not being decremented 
       // TODO: why does y get negative
       if (abs(F + L.y) < abs(F + L.y + L.x)) {
@@ -132,7 +132,6 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (y >= end) {
-      ret.push_back(Vector2d(x, y));
       canvas[x][y] = colour;
 
       if (abs(F - L.x) < abs(F - L.y - L.x)) {
@@ -141,6 +140,7 @@ public:
       } else {
         y--;
         x++;
+      ret.push_back(Vector2d(x, y));
         F += -L.y - L.x;
       }
     }
@@ -149,18 +149,26 @@ public:
     return ret;
   } 
  vector<Vector2d> render_vertical_line(int x, int start_y, int end_y, ColourRGB colour, int thickness) {
+   cout << "RENDERING VERTICAL LINE " << endl;
   	vector<Vector2d> ret;
     if (start_y < end_y) {
-      for (int i = start_y; i < end_y; ++i) {
+      int i = 0;
+      cout << "Going from start y: " << start_y << " to end y: " << end_y <<  " on x: " <<  x << endl; 
+      for (i = start_y; i < end_y; ++i) {
         canvas[x][i] = colour;
         ret.push_back(Vector2d(x, i));
       }
+      cout << "Ended up at y: " << i << endl;
     } else {
-      for (int i = end_y; i < start_y; ++i) {
+      cout << "Going from start y: " << end_y << " to end y: " << start_y <<  " on x: " <<  x << endl; 
+      int i = 0;
+      for (i = end_y; i < start_y; ++i) {
         canvas[x][i] = colour;
         ret.push_back(Vector2d(x, i));
       }
+      cout << "Ended up at y: " << i << endl;
     }
+    cout << "DONE RENDERING VERTICAL LINE " << endl;
     return ret;
   }
   vector<Vector2d> render_and_return_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
@@ -288,16 +296,47 @@ public:
     cout << "RENDERING TRIANGLE" << endl;
     cout << "Points are as follows " << point1 << point2 << point3 << endl;
     vector<Vector2d> vertices = { point1, point2, point3 }; 
-
+    
     sort(vertices.begin(), vertices.end(), [] (auto a, auto b) { return a.x < b.x; });
 
     cout << "Points in order are as follows " << vertices[0] << vertices[1] << vertices[2] << endl;
     // line from start to middle 
 	  auto line0 = render_and_return_line(vertices[0], vertices[1], line_colour, line_thickness);
-
-    // line from 
+    
+    // line from start to end
 	  auto line1 = render_and_return_line(vertices[0], vertices[2], line_colour, line_thickness);
+    
+    // line from middle to end
 	  auto line2 = render_and_return_line(vertices[1], vertices[2], line_colour, line_thickness);
+    
+    sort(line0.begin(), line0.end(), [] (auto a, auto b) { return a.x < b.x; });
+    sort(line1.begin(), line1.end(), [] (auto a, auto b) { return a.x < b.x; });
+    sort(line2.begin(), line2.end(), [] (auto a, auto b) { return a.x < b.x; });
+
+    // fill in the triangle
+    int j = 0;
+    int i = 0;
+    bool midpoint = false;
+    while (i < line1.size()) {
+      if (line1[i].x < vertices[1].x) {
+        render_vertical_line(line1[i].x, line1[i].y, line0[i].y, fill_colour, line_thickness);
+      } else {
+        if (!midpoint) {
+          cout << "MIDPOINT" << endl;
+          midpoint = true;
+        }
+        render_vertical_line(line1[i].x, line1[i].y, line2[j].y, fill_colour, line_thickness);
+        j++;
+      }
+      i++;
+    }
+
+    // redraw the edges to make it look all pretty
+	  render_and_return_line(vertices[0], vertices[1], line_colour, line_thickness);
+    
+	  render_and_return_line(vertices[0], vertices[2], line_colour, line_thickness);
+    
+	  render_and_return_line(vertices[1], vertices[2], line_colour, line_thickness);
     
     cout << "DONE RENDERING TRIANGLE" << endl;
 	}
