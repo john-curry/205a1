@@ -22,7 +22,7 @@
 using namespace std;
 
 static const int MAX_LINE = 10000;
-
+int mscale_factor;
 class ParsingException{
 public:
 	ParsingException(string line, int line_number, string message, int position=-1){
@@ -295,8 +295,9 @@ public:
 	}
 	virtual void parse(BVGRendererBase& renderer, string line, int line_number){
 		BVGCommandHandler::parse_keys(renderer,line,line_number);
+    mscale_factor = scale_factor.value;
 		renderer.create_canvas(
-					dimensions.v,
+					Vector2d(dimensions.v.x * mscale_factor, dimensions.v.y * mscale_factor),
 					background_colour.colour,
 					scale_factor.value
 					);
@@ -317,7 +318,7 @@ public:
 	}
 	virtual void parse(BVGRendererBase& renderer, string line, int line_number){
 		BVGCommandHandler::parse_keys(renderer,line,line_number);
-		renderer.render_line(from.v, to.v, colour.colour, thickness.value);
+		renderer.render_line(from.v * mscale_factor, to.v * mscale_factor, colour.colour, thickness.value * mscale_factor);
 	}
 private:
 	BVGParserVector from;
@@ -336,7 +337,7 @@ public:
 	}
 	virtual void parse(BVGRendererBase& renderer, string line, int line_number){
 		BVGCommandHandler::parse_keys(renderer,line,line_number);
-		renderer.render_circle(center.v, radius.value, line_colour.colour, line_thickness.value);
+		renderer.render_circle(Vector2d(center.v.x * mscale_factor, center.v.y * mscale_factor), radius.value * mscale_factor, line_colour.colour, line_thickness.value * mscale_factor);
 	}
 private:
 	BVGParserVector center;
@@ -356,7 +357,7 @@ public:
 	}
 	virtual void parse(BVGRendererBase& renderer, string line, int line_number){
 		BVGCommandHandler::parse_keys(renderer,line,line_number);
-		renderer.render_filledcircle(center.v, radius.value, line_colour.colour, line_thickness.value, fill_colour.colour);
+		renderer.render_filledcircle(Vector2d(center.v.x* mscale_factor, center.v.y * mscale_factor), radius.value, line_colour.colour, line_thickness.value, fill_colour.colour);
 	}
 private:
 	BVGParserVector center;
@@ -378,7 +379,14 @@ public:
 	}
 	virtual void parse(BVGRendererBase& renderer, string line, int line_number){
 		BVGCommandHandler::parse_keys(renderer,line,line_number);
-		renderer.render_triangle(point1.v,point2.v,point3.v, line_colour.colour, line_thickness.value, fill_colour.colour);
+		renderer.render_triangle(
+      Vector2d(point1.v.x * mscale_factor, point1.v.y * mscale_factor),
+      Vector2d(point2.v.x * mscale_factor, point2.v.y * mscale_factor),
+      Vector2d(point3.v.x * mscale_factor, point3.v.y * mscale_factor), 
+      line_colour.colour, 
+      line_thickness.value * mscale_factor, 
+      fill_colour.colour
+    );
 	}
 private:
 	BVGParserVector point1;
@@ -408,7 +416,12 @@ public:
 	}
 	virtual void parse(BVGRendererBase& renderer, string line, int line_number){
 		BVGCommandHandler::parse_keys(renderer,line,line_number);
-		renderer.render_gradient_triangle(point1.v, point2.v, point3.v, line_colour.colour, line_thickness.value, colour1.colour,colour2.colour,colour3.colour);
+		renderer.render_gradient_triangle(
+      Vector2d(point1.v.x * mscale_factor, point1.v.y * mscale_factor),
+      Vector2d(point2.v.x * mscale_factor, point2.v.y * mscale_factor),
+      Vector2d(point3.v.x * mscale_factor, point3.v.y * mscale_factor),
+      line_colour.colour, 
+      line_thickness.value, colour1.colour,colour2.colour,colour3.colour);
 	}
 private:		
 	BVGParserVector point1;
