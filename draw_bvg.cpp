@@ -1,8 +1,3 @@
-/* draw_bvg.cpp
-   B. Bird - 01/02/2016
-*/
-
-
 #include <string>
 #include <iostream>
 #include <cstdlib>
@@ -311,8 +306,9 @@ public:
     if(d::debug) cout << "RENDERING TRIANGLE" << endl;
     if(d::debug) cout << "Points are as follows " << point1 << point2 << point3 << endl;
     vector<Vector2d> vertices = { point1, point2, point3 }; 
-    
-    sort(vertices.begin(), vertices.end(), [] (auto a, auto b) { return a.x < b.x; });
+    auto cmp_x = [] (Vector2d a, Vector2d b) { return a.x < b.x; };
+
+    sort(vertices.begin(), vertices.end(), cmp_x);
 
     if(d::debug) cout << "Points in order are as follows " << vertices[0] << vertices[1] << vertices[2] << endl;
     // line from start to middle 
@@ -324,9 +320,9 @@ public:
     // line from middle to end
 	  auto line2 = render_and_return_line(vertices[1], vertices[2], line_colour, line_thickness);
     
-    sort(line0.begin(), line0.end(), [] (auto a, auto b) { return a.x < b.x; });
-    sort(line1.begin(), line1.end(), [] (auto a, auto b) { return a.x < b.x; });
-    sort(line2.begin(), line2.end(), [] (auto a, auto b) { return a.x < b.x; });
+    sort(line0.begin(), line0.end(), cmp_x);
+    sort(line1.begin(), line1.end(), cmp_x);
+    sort(line2.begin(), line2.end(), cmp_x);
     // fill in the triangle
     int j = 0;
     int i = 0;
@@ -364,22 +360,22 @@ public:
 		vector<Vector2d> vertices = { point1, point2, point3 };
 		
 		auto min_x = accumulate(vertices.begin(), vertices.end(), vertices[0], 
-      [] (auto v1, auto v2) { 
+      [] (Vector2d v1, Vector2d v2) { 
         return v1.x < v2.x ? v1 : v2; 
       }
     );
 		auto min_y = accumulate(vertices.begin(), vertices.end(), vertices[0],
-      [] (auto v1, auto v2) { 
+      [] (Vector2d v1, Vector2d v2) { 
         return v1.y < v2.y ? v1 : v2; 
       }
     );
 		auto max_x = accumulate(vertices.begin(), vertices.end(), vertices[0],
-      [] (auto v1, auto v2) { 
+      [] (Vector2d v1, Vector2d v2) { 
         return v1.x > v2.x ? v1 : v2; 
       }
     );
 		auto max_y = accumulate(vertices.begin(), vertices.end(), vertices[0],
-      [] (auto v1, auto v2) { 
+      [] (Vector2d v1, Vector2d v2) { 
         return v1.y > v2.y ? v1 : v2; 
       }
     );
