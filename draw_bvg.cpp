@@ -312,7 +312,6 @@ public:
     sort(line0.begin(), line0.end(), [] (auto a, auto b) { return a.x < b.x; });
     sort(line1.begin(), line1.end(), [] (auto a, auto b) { return a.x < b.x; });
     sort(line2.begin(), line2.end(), [] (auto a, auto b) { return a.x < b.x; });
-
     // fill in the triangle
     int j = 0;
     int i = 0;
@@ -342,7 +341,65 @@ public:
 	}
 
 	virtual void render_gradient_triangle(Vector2d point1, Vector2d point2, Vector2d point3, ColourRGB line_colour, int line_thickness, ColourRGB colour1, ColourRGB colour2, ColourRGB colour3){
-		cout << "Triangle " << point1 << point2 << point3 << line_colour << line_thickness << colour1 << colour2 << colour3 << endl;
+		// find the bounding box of the triangle // interate over all points 
+		// if the point is inside the triangle
+		// fill it with the color associated with its barycentric coordinates
+    cout << "RENDERING GRADIENT TRIANGLE" << endl;		
+    cout << "Rendering points " << point1 << point2 << point3 << endl;		
+		vector<Vector2d> vertices = { point1, point2, point3 };
+		
+		auto min_x = accumulate(vertices.begin(), vertices.end(), vertices[0], 
+      [] (auto v1, auto v2) { 
+        return v1.x < v2.x ? v1 : v2; 
+      }
+    );
+		auto min_y = accumulate(vertices.begin(), vertices.end(), vertices[0],
+      [] (auto v1, auto v2) { 
+        return v1.y < v2.y ? v1 : v2; 
+      }
+    );
+		auto max_x = accumulate(vertices.begin(), vertices.end(), vertices[0],
+      [] (auto v1, auto v2) { 
+        return v1.x > v2.x ? v1 : v2; 
+      }
+    );
+		auto max_y = accumulate(vertices.begin(), vertices.end(), vertices[0],
+      [] (auto v1, auto v2) { 
+        return v1.y > v2.y ? v1 : v2; 
+      }
+    );
+		
+		auto origin = Vector2d(min_x.x, min_y.y);
+		
+		auto width = max_x.x - min_x.x;
+		auto height = max_y.y - min_y.y;
+
+	  cout << "Bounding rectangle is at " << origin << " with a width of " << width << " and a height of " << height << endl;	
+		for (int i = origin.x; i < width + origin.x; ++i) {
+			for (int j = origin.y; j < height + origin.y; ++j) {
+				auto num1 = (point2.y - point3.y)*(i - point3.x) + (point3.x - point2.x)*(j - point3.y);
+				auto den1 = (point2.y - point3.y)*(point1.x - point3.x) + (point3.x - point2.x)*(point1.y - point3.y);
+				auto num2 = (point3.y - point1.y)*(i - point3.x) + (point1.x - point3.x)*(j - point3.y);
+				auto den2 = (point2.y - point3.y)*(point1.x - point3.x) + (point3.x - point2.x)*(point1.y - point3.y);
+				
+				auto lambda_1 = (float)num1 / (float)den1;
+				auto lambda_2 = (float)num2 / (float)den2;
+				auto lambda_3 = 1 - lambda_1 - lambda_2;
+			  cout << "Converted coordinates " << lambda_1 << " " << lambda_2 << " " << lambda_3 << endl;	
+				if (((lambda_1 + lambda_2 + lambda_3) <= 1) && (lambda_1 >= 0 && lambda_2 >= 0 && lambda_3 >= 0)) { // the point is in the triangle
+          cout << "Found point inside the triangle" << endl;
+					canvas[i][j] = ColourRGB(255*lambda_1, 255*lambda_2, 255*lambda_3);
+				}
+			}
+		}
+
+    // redraw the edges to make it look all pretty
+	  render_and_return_line(vertices[0], vertices[1], line_colour, line_thickness);
+    
+	  render_and_return_line(vertices[0], vertices[2], line_colour, line_thickness);
+    
+	  render_and_return_line(vertices[1], vertices[2], line_colour, line_thickness);
+    cout << "DONE RENDERING GRADIENT TRIANGLE" << endl;		
 	}
 	
 	void save_image(string filename){
