@@ -16,6 +16,17 @@ using namespace std;
 
 class BVGRenderer: public BVGRendererBase{
 public:
+  void render_rectangle(Vector2d center, int width, int height, ColourRGB colour) {
+    Vector2d origin(center.x - (width / 2), center.y - (height / 2));
+    for (int i = origin.x; i < origin.x + width; ++i) {
+      for (int j = origin.y; j < origin.y + height; ++j) {
+        if (i >= 0 && j  >= 0) {
+          canvas[i][j] = colour;
+        }
+      }
+    }
+  }
+
 	virtual void create_canvas(Vector2d dimensions, ColourRGB background_colour, int scale_factor){
 		cout << "Canvas " << dimensions << background_colour << scale_factor << endl;
 		width = dimensions[0];
@@ -43,7 +54,7 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (y < end) {
-      canvas[x][y] = colour;
+      render_rectangle(Vector2d(x, y), thickness, thickness, colour);
 
       if (abs(F - L.x) < abs(F + (L.y - L.x))) {
         y++;
@@ -73,8 +84,8 @@ public:
 
     while (x < end) {
       ret.push_back(Vector2d(x, y));
-      canvas[x][y] = colour;
-      
+      //canvas[x][y] = colour;
+      render_rectangle(Vector2d(x, y), thickness, thickness, colour); 
       if (abs(F + L.y) < abs(F + (L.y - L.x))) {
         x++;
         F += L.y;
@@ -102,7 +113,7 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (x < end && y >= 0) {
-      canvas[x][y] = colour;
+      render_rectangle(Vector2d(x, y), thickness, thickness, colour);
       ret.push_back(Vector2d(x, y));
       // TODO: figure out why switching the signs fixed y not being decremented 
       // TODO: why does y get negative
@@ -132,8 +143,8 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (y >= end) {
-      canvas[x][y] = colour;
 
+      render_rectangle(Vector2d(x, y), thickness, thickness, colour);
       if (abs(F - L.x) < abs(F - L.y - L.x)) {
         y--;
         F -= L.x;
@@ -155,7 +166,7 @@ public:
       int i = 0;
       cout << "Going from start y: " << start_y << " to end y: " << end_y <<  " on x: " <<  x << endl; 
       for (i = start_y; i < end_y; ++i) {
-        canvas[x][i] = colour;
+        render_rectangle(Vector2d(x, i), thickness, thickness, colour);
         ret.push_back(Vector2d(x, i));
       }
       cout << "Ended up at y: " << i << endl;
@@ -163,7 +174,7 @@ public:
       cout << "Going from start y: " << end_y << " to end y: " << start_y <<  " on x: " <<  x << endl; 
       int i = 0;
       for (i = end_y; i < start_y; ++i) {
-        canvas[x][i] = colour;
+        render_rectangle(Vector2d(x, i), thickness, thickness, colour);
         ret.push_back(Vector2d(x, i));
       }
       cout << "Ended up at y: " << i << endl;
@@ -237,14 +248,14 @@ public:
     int y = radius;
     cout << "start x: " << x << " start y: " << y << endl;
     while (x <= y) {
-      canvas[ x + center.x][ y + center.y] = line_colour;
-      canvas[-x + center.x][ y + center.y] = line_colour;
-      canvas[ x + center.x][-y + center.y] = line_colour;
-      canvas[-x + center.x][-y + center.y] = line_colour;
-      canvas[ y + center.y][ x + center.x] = line_colour;
-      canvas[-y + center.y][ x + center.x] = line_colour;
-      canvas[ y + center.y][-x + center.x] = line_colour;
-      canvas[-y + center.y][-x + center.x] = line_colour;
+      render_rectangle(Vector2d( x + center.x,  y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-x + center.x,  y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d( x + center.x, -y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-x + center.x, -y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d( y + center.y,  x + center.x), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-y + center.y,  x + center.x), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d( y + center.y, -x + center.x), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-y + center.y, -x + center.x), line_thickness, line_thickness, line_colour);
       if (abs(F + (2 * x) + 1) < abs(F + (2 * x) - (2 * y) + 2)) {
         x++;
         F = F + 2 * x;
@@ -264,14 +275,14 @@ public:
     int y = radius;
     cout << "start x: " << x << " start y: " << y << endl;
     while (x <= y) {
-      canvas[ x + center.x][ y + center.y] = fill_colour;
-      canvas[-x + center.x][ y + center.y] = fill_colour;
-      canvas[ x + center.x][-y + center.y] = fill_colour;
-      canvas[-x + center.x][-y + center.y] = fill_colour;
-      canvas[ y + center.y][ x + center.x] = fill_colour;
-      canvas[-y + center.y][ x + center.x] = fill_colour;
-      canvas[ y + center.y][-x + center.x] = fill_colour;
-      canvas[-y + center.y][-x + center.x] = fill_colour;
+      render_rectangle(Vector2d( x + center.x,  y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-x + center.x,  y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d( x + center.x, -y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-x + center.x, -y + center.y), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d( y + center.y,  x + center.x), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-y + center.y,  x + center.x), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d( y + center.y, -x + center.x), line_thickness, line_thickness, line_colour);
+      render_rectangle(Vector2d(-y + center.y, -x + center.x), line_thickness, line_thickness, line_colour);
 
       render_line(Vector2d(-x + center.x,  y + center.y), Vector2d( x + center.x,  y + center.y), fill_colour, 1);
       render_line(Vector2d(-y + center.y,  x + center.x), Vector2d( y + center.y,  x + center.x), fill_colour, 1);
