@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
+#include <cassert>
 #include "vector2d.h"
 #include "colourRGB.h"
 #include "bvg.h"
@@ -35,9 +36,9 @@ public:
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				canvas[x][y] = background_colour;
-        if (x % 100 == 0 || y % 100 == 0) {
-          canvas[x][y] = ColourRGB(255, 255, 255);
-        }
+        //if (x % 100 == 0 || y % 100 == 0) {
+        //  canvas[x][y] = ColourRGB(255, 255, 255);
+        //}
       }
     }
 	}
@@ -132,7 +133,9 @@ public:
   } 
 	vector<Vector2d> render_negative_steep_line(Vector2d endpoint1, Vector2d endpoint2, ColourRGB colour, int thickness){
   	vector<Vector2d> ret;
+
     cout << "START RENDERING NEGATIVE STEEP LINE " << endl;
+    assert(endpoint1.x <= endpoint2.x);
     int F = 0;
     int x = endpoint1.x;
     int y = endpoint1.y;
@@ -143,8 +146,8 @@ public:
     cout << "Ending x: " << endpoint2.x  << " and ending y: "<< endpoint2.y << endl;
 
     while (y >= end) {
-
       render_rectangle(Vector2d(x, y), thickness, thickness, colour);
+
       if (abs(F - L.x) < abs(F - L.y - L.x)) {
         y--;
         F -= L.x;
@@ -195,7 +198,7 @@ public:
     int delta_y = endpoint2.y - endpoint1.y;
 
     if (delta_y == 0 && delta_x == 0) {
-      canvas[endpoint1.x][endpoint1.y] = colour;
+      render_rectangle(Vector2d(endpoint1.x, endpoint1.y), thickness, thickness, colour);
       ret = { endpoint1 };
       return ret;
     }
@@ -205,15 +208,15 @@ public:
       return ret;
     }
 
-    if ((delta_x < 0) ^ (delta_y < 0)) { 
-      if (abs(delta_x) < abs(delta_y)) {
-        if (delta_x < 0 && delta_y < 0) {
+    if ((delta_x < 0) ^ (delta_y < 0)) { // if the slope is negative
+      if (abs(delta_x) < abs(delta_y)) { // if the slope is steep
+        if (endpoint1.x > endpoint2.x) { // if the endpoints are switched
           ret = render_negative_steep_line(endpoint2, endpoint1, colour, thickness);
         } else {
           ret = render_negative_steep_line(endpoint1, endpoint2, colour, thickness);
         }
       } else {
-        if (delta_x < 0 && delta_y < 0) {
+        if (endpoint1.x > endpoint2.x) {
           ret = render_negative_line(endpoint2, endpoint1, colour, thickness);
         } else {
           ret = render_negative_line(endpoint1, endpoint2, colour, thickness);
@@ -399,7 +402,12 @@ public:
 			  cout << "Converted coordinates " << lambda_1 << " " << lambda_2 << " " << lambda_3 << endl;	
 				if (((lambda_1 + lambda_2 + lambda_3) <= 1) && (lambda_1 >= 0 && lambda_2 >= 0 && lambda_3 >= 0)) { // the point is in the triangle
           cout << "Found point inside the triangle" << endl;
-					canvas[i][j] = ColourRGB(255*lambda_1, 255*lambda_2, 255*lambda_3);
+
+          int red = lambda_1*colour1.r + lambda_2*colour2.r + lambda_3*colour3.r;
+          int gre = lambda_1*colour1.g + lambda_2*colour2.g + lambda_3*colour3.g;
+          int blu = lambda_1*colour1.b + lambda_2*colour2.b + lambda_3*colour3.b;
+
+					canvas[i][j] = ColourRGB(red, gre, blu);
 				}
 			}
 		}
